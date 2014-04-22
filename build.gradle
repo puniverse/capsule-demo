@@ -1,0 +1,124 @@
+apply plugin: 'java'
+apply plugin:'application'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+mainClassName = "foo.Main"
+    
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+configurations {
+    capsule
+    quasar
+}
+
+dependencies {
+    capsule 'co.paralleluniverse:capsule:0.1.0'
+    compile ('co.paralleluniverse:quasar-core:0.5.0:jdk8')  {
+        exclude group: 'org.slf4j', module: '*'
+        exclude group: 'org.apache.logging.log4j', module: '*'
+        exclude group: 'org.apache.ant', module: '*'
+    }
+    compile "co.paralleluniverse:quasar-actors:0.5.0"
+    quasar  "co.paralleluniverse:quasar-core:0.5.0:jdk8"
+    testCompile group: 'junit', name: 'junit', version: '4.10'
+}
+
+tasks.withType(JavaExec) {
+    standardInput = System.in
+    
+    jvmArgs '-server'
+    jvmArgs "-javaagent:${configurations.quasar.iterator().next()}" // =vdmc (verbose, debug, allow monitors, check class)
+    // systemProperty "co.paralleluniverse.fibers.DefaultFiberPool.parallelism", "4"
+    systemProperty "co.paralleluniverse.fibers.DefaultFiberPool.monitor", "JMX" // "METRICS" // "NONE" //
+    systemProperty "co.paralleluniverse.actors.moduleDir", "${rootProject.projectDir}/modules"
+    
+    // memory
+    jvmArgs '-Xmx1024m'
+}
+
+apply plugin: 'maven'
+
+task writePom << {
+    pom {
+        project {
+            groupId 'com.acme'
+            artifactId 'foo'
+            version '1.0'
+        }
+    }.writeTo("$buildDir/pom.xml")
+}
+
+task pomCapsule(type: Jar, dependsOn: [writePom, classes]) {
+    archiveName = "foo.jar"
+    from sourceSets.main.output // this way we don't need to extract the capsule
+    from "$buildDir/pom.xml"
+    from { configurations.capsule.collect { zipTree(it) } }
+    
+    manifest { 
+        attributes(
+	    'Main-Class'  :   'Capsule',
+            'Application-Class'   : mainClassName,
+            'Extract-Capsule' : 'false',
+            'Min-Java-Version' : '1.8.0',
+            'JVM-Args' : run.jvmArgs.join(' '),
+            'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
+            'Java-Agents' : getDependencies(configurations.quasar).iterator().next(),
+        )
+    }
+}
+
+def getDependencies(config) {
+    return config.getAllDependencies().collect { 
+        def res = it.group + ':' + it.name + ':' + it.version + (!it.artifacts.isEmpty() ? ':' + it.artifacts.iterator().next().classifier : '')
+        if(!it.excludeRules.isEmpty()) {
+            res += "(" + it.excludeRules.collect { it.group + ':' + it.module }.join(',') + ")"
+        }
+        return res
+    }
+}
+
+task capsule(type: Jar, dependsOn: classes) {
+    archiveName = "foo.jar"
+    from sourceSets.main.output // this way we don't need to extract
+    from { configurations.capsule.collect { zipTree(it) } }
+    
+    manifest { 
+        attributes(
+	    'Main-Class'  :   'Capsule',
+            'Application-Class'   : mainClassName,
+            'Extract-Capsule' : 'false',
+            'Min-Java-Version' : '1.8.0',
+            'JVM-Args' : run.jvmArgs.join(' '),
+            'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
+            'Java-Agents' : getDependencies(configurations.quasar).iterator().next(),
+            'Dependencies': getDependencies(configurations.runtime).join(' ')
+        )
+    }
+}
+
+task fullCapsule(type: Jar, dependsOn: jar) {
+    archiveName = "foo.jar"
+    
+    from jar // embed our application jar
+    from { configurations.runtime } // embed dependencies
+    
+    from(configurations.capsule.collect { zipTree(it) }) //{ include 'Capsule.class' } // we just need the single Capsule class
+    
+    manifest { 
+        attributes(
+	    'Main-Class'  : 'Capsule',
+            'Application-Class' : mainClassName,
+            'Java-Version' : '1.8.0',
+            'JVM-Args' : run.jvmArgs.join(' '),
+            'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
+            'Java-Agents' : configurations.quasar.iterator().next().getName()
+        )
+    }
+}
