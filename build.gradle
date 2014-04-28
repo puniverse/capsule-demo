@@ -7,7 +7,12 @@ targetCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 mainClassName = "foo.Main"
-    
+
+group       = "co.paralleluniverse"
+version     = "0.2.0"
+status      = "integration"
+description = "A demo using Capsule"
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -19,7 +24,7 @@ configurations {
 }
 
 dependencies {
-    capsule 'co.paralleluniverse:capsule:0.1.0'
+    capsule 'co.paralleluniverse:capsule:0.2.0'
     compile ('co.paralleluniverse:quasar-core:0.5.0:jdk8')  {
         exclude group: 'org.slf4j', module: '*'
         exclude group: 'org.apache.logging.log4j', module: '*'
@@ -121,4 +126,26 @@ task fullCapsule(type: Jar, dependsOn: jar) {
             'Java-Agents' : configurations.quasar.iterator().next().getName()
         )
     }
+}
+
+//jar {
+//    manifest { 
+//        attributes(
+//	    'Main-Class'  : mainClassName,
+//        )
+//    }
+//}
+
+
+///////// Publish Artifacts 
+apply plugin: 'maven'
+
+artifacts {
+    archives capsule
+}
+
+install.dependsOn capsule
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
 }
