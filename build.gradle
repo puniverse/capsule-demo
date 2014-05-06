@@ -24,7 +24,7 @@ configurations {
 }
 
 dependencies {
-    capsule 'co.paralleluniverse:capsule:0.2.0'
+    capsule 'co.paralleluniverse:capsule:0.3.0'
     compile ('co.paralleluniverse:quasar-core:0.5.0:jdk8')  {
         exclude group: 'org.slf4j', module: '*'
         exclude group: 'org.apache.logging.log4j', module: '*'
@@ -100,6 +100,7 @@ task capsule(type: Jar, dependsOn: classes) {
             'Application-Class'   : mainClassName,
             'Extract-Capsule' : 'false',
             'Min-Java-Version' : '1.8.0',
+            // 'Args' :     'hello world',
             'JVM-Args' : run.jvmArgs.join(' '),
             'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
             'Java-Agents' : getDependencies(configurations.quasar).iterator().next(),
@@ -120,7 +121,7 @@ task fullCapsule(type: Jar, dependsOn: jar) {
         attributes(
 	    'Main-Class'  : 'Capsule',
             'Application-Class' : mainClassName,
-            'Java-Version' : '1.8.0',
+            'Min-Java-Version' : '1.8.0',
             'JVM-Args' : run.jvmArgs.join(' '),
             'System-Properties' : run.systemProperties.collect { k,v -> "$k=$v" }.join(' '),
             'Java-Agents' : configurations.quasar.iterator().next().getName()
