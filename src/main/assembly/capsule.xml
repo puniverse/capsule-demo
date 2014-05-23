@@ -23,6 +23,9 @@
         </dependencySet>
         <dependencySet>
             <outputDirectory>/</outputDirectory>
+            <excludes>
+              <exclude>co.paralleluniverse:capsule:*</exclude>
+            </excludes>
             <useProjectArtifact>true</useProjectArtifact>
             <unpack>false</unpack>
             <scope>runtime</scope>
