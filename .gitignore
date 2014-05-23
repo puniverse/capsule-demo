@@ -1,5 +1,6 @@
 .DS_Store
 /dist/
+/target/
 /out/
 _site/
 /docs/javadoc/
