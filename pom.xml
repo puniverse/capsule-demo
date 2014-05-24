@@ -20,16 +20,16 @@
       <scope>compile</scope>
       <exclusions>
         <exclusion>
-          <artifactId>*</artifactId>
           <groupId>org.apache.ant</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>*</artifactId>
           <groupId>org.slf4j</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>*</artifactId>
           <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>capsule</artifactId>
-      <version>0.4.1</version>
+      <version>0.4.2</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -74,10 +74,11 @@
               <Min-Java-Version>1.8.0</Min-Java-Version>
               <JVM-Args></JVM-Args>
               <System-Properties></System-Properties>
-              <Java-Agents>quasar-core-0.5.0-jdk8.jar</Java-Agents>
+              <Java-Agents>co.paralleluniverse:quasar-core:0.5.0:jdk8</Java-Agents>
             </manifestEntries>
           </archive>
           <descriptors>
+            <descriptor>src/main/assembly/capsule-full.xml</descriptor>
             <descriptor>src/main/assembly/capsule.xml</descriptor>
           </descriptors>
         </configuration>
