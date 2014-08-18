@@ -42,7 +42,7 @@
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>capsule</artifactId>
-      <version>0.6.0</version>
+      <version>0.7.0-SNAPSHOT</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -79,7 +79,7 @@
             </manifestEntries>
           </archive>
           <descriptors>
-            <descriptor>src/main/assembly/capsule-full.xml</descriptor>
+            <descriptor>src/main/assembly/capsule-fat.xml</descriptor>
             <descriptor>src/main/assembly/capsule.xml</descriptor>
           </descriptors>
         </configuration>
