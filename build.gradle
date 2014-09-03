@@ -29,10 +29,10 @@ sourceSets {
     test.compileClasspath = test.compileClasspath + configurations.provided
     test.runtimeClasspath = test.runtimeClasspath + configurations.provided
 }
-    
+
 dependencies {
-    capsule 'co.paralleluniverse:capsule:0.7.1'
-    provided 'co.paralleluniverse:capsule:0.7.1'
+    capsule 'co.paralleluniverse:capsule:0.8.0'
+    provided 'co.paralleluniverse:capsule:0.8.0'
     compile ('co.paralleluniverse:quasar-core:0.6.0:jdk8')  {
         exclude group: 'org.slf4j', module: '*'
         exclude group: 'org.apache.logging.log4j', module: '*'
@@ -45,13 +45,13 @@ dependencies {
 
 tasks.withType(JavaExec) {
     standardInput = System.in
-    
+
     jvmArgs '-server'
     jvmArgs "-javaagent:${configurations.quasar.iterator().next()}" // =vdmc (verbose, debug, allow monitors, check class)
     // systemProperty "co.paralleluniverse.fibers.DefaultFiberPool.parallelism", "4"
     systemProperty "co.paralleluniverse.fibers.DefaultFiberPool.monitor", "JMX" // "METRICS" // "NONE" //
     systemProperty "co.paralleluniverse.actors.moduleDir", "${rootProject.projectDir}/modules"
-    
+
     // memory
     jvmArgs '-Xmx1024m'
 }
@@ -74,8 +74,8 @@ task pomCapsule(type: Jar, dependsOn: [writePom, classes]) {
     from sourceSets.main.output // this way we don't need to extract the capsule
     from "$buildDir/pom.xml"
     from { configurations.capsule.collect { zipTree(it) } }
-    
-    manifest { 
+
+    manifest {
         attributes(
 	    'Main-Class'  :   'Capsule',
             'Application-Class'   : mainClassName,
@@ -90,7 +90,7 @@ task pomCapsule(type: Jar, dependsOn: [writePom, classes]) {
 
 // converts Gradle dependencies into Capsule dependencies
 def getDependencies(config) {
-    return config.getAllDependencies().collect { 
+    return config.getAllDependencies().collect {
         def res = it.group + ':' + it.name + ':' + it.version + (!it.artifacts.isEmpty() ? ':' + it.artifacts.iterator().next().classifier : '')
         if(!it.excludeRules.isEmpty()) {
             res += "(" + it.excludeRules.collect { it.group + ':' + it.module }.join(',') + ")"
@@ -104,8 +104,8 @@ task capsule(type: Jar, dependsOn: classes) {
     archiveName = "foo.jar"
     from sourceSets.main.output // this way we don't need to extract
     from { configurations.capsule.collect { zipTree(it) } }
-    
-    manifest { 
+
+    manifest {
         attributes(
 	    'Main-Class'  :   'Capsule',
             'Application-Class'   : mainClassName,
@@ -123,14 +123,14 @@ task capsule(type: Jar, dependsOn: classes) {
 // creates a "fat" capsule, with all dependencies embedded in the capsule
 task fatCapsule(type: Jar, dependsOn: jar) {
     archiveName = "foo.jar"
-    
+
     from(configurations.capsule.collect { zipTree(it) }) { include 'Capsule.class' } // we just need the single Capsule class
     // from(zipTree(jar.archivePath)) { include 'MyCapsule.class' } // - if we want a custom capsule
 
     from jar // embed our application jar
     from { configurations.runtime } // embed dependencies
-    
-    manifest { 
+
+    manifest {
         attributes(
 	    'Main-Class'  : 'Capsule', // 'MyCapsule', // - if we want a custom capsule
             'Application-Class' : mainClassName,
@@ -142,8 +142,27 @@ task fatCapsule(type: Jar, dependsOn: jar) {
     }
 }
 
+tasks.withType(Jar) {
+    doLast { task -> reallyExecutable(task) }
+}
+
+def reallyExecutable(jar) {
+    ant.concat(destfile: "tmp.jar", binary: true) {
+        zipentry(zipfile: configurations.capsule.singleFile, name: 'capsule/trampoline-execheader.sh')
+        fileset(dir: jar.destinationDir) {
+            include(name: jar.archiveName)
+        }
+    }
+    copy {
+        from 'tmp.jar'
+        into jar.destinationDir
+        rename { jar.archiveName }
+    }
+    delete 'tmp.jar'
+}
+
 //jar {
-//    manifest { 
+//    manifest {
 //        attributes(
 //	    'Main-Class'  : mainClassName,
 //        )
@@ -151,7 +170,7 @@ task fatCapsule(type: Jar, dependsOn: jar) {
 //}
 
 
-///////// Publish Artifacts 
+///////// Publish Artifacts
 apply plugin: 'maven'
 
 artifacts {
