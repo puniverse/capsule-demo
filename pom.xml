@@ -42,7 +42,7 @@
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>capsule</artifactId>
-      <version>0.8.0</version>
+      <version>0.9.0</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
