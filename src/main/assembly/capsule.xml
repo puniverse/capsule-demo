@@ -19,6 +19,14 @@
         <dependencySet>
             <outputDirectory>/</outputDirectory>
             <includes>
+                <include>co.paralleluniverse:capsule-maven:jar</include>
+            </includes>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <includes>
                 <include>${project.groupId}:${project.artifactId}:*</include>
             </includes>
             <useProjectArtifact>true</useProjectArtifact>

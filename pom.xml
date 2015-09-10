@@ -9,13 +9,13 @@
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>quasar-actors</artifactId>
-      <version>0.6.0</version>
+      <version>0.7.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>quasar-core</artifactId>
-      <version>0.6.0</version>
+      <version>0.7.3</version>
       <classifier>jdk8</classifier>
       <scope>compile</scope>
       <exclusions>
@@ -42,7 +42,14 @@
     <dependency>
       <groupId>co.paralleluniverse</groupId>
       <artifactId>capsule</artifactId>
-      <version>0.10.0</version>
+      <version>1.0</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>co.paralleluniverse</groupId>
+      <artifactId>capsule-maven</artifactId>
+      <version>1.0</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -72,15 +79,16 @@
             </manifest>
             <manifestEntries>
               <Application-Class>foo.Main</Application-Class>
+              <!-- <Caplets>MavenCapsule</Caplets> --> <!-- uncomment for a thin capsule -->
               <Min-Java-Version>1.8.0</Min-Java-Version>
               <JVM-Args></JVM-Args>
               <System-Properties></System-Properties>
-              <Java-Agents>co.paralleluniverse:quasar-core:0.6.0:jdk8</Java-Agents>
+              <Java-Agents>co.paralleluniverse:quasar-core:0.7.3:jdk8</Java-Agents>
             </manifestEntries>
           </archive>
           <descriptors>
-            <descriptor>src/main/assembly/capsule-fat.xml</descriptor>
-            <descriptor>src/main/assembly/capsule.xml</descriptor>
+            <descriptor>src/main/assembly/capsule-fat.xml</descriptor> 
+            <!-- <descriptor>src/main/assembly/capsule.xml</descriptor> --> <!-- uncomment for a thin capsule -->
           </descriptors>
         </configuration>
         <executions>
